@@ -6,6 +6,7 @@ from __future__ import print_function
 
 import tensorflow as tf
 import crp_util
+import numpy as np
 
 #Inputs and labels using randomly generated data
 # challenge_size = 16
@@ -14,7 +15,7 @@ import crp_util
 # challenges, responses = crp_util.get_simulated_challenge_response_pairs(num_examples, challenge_size)
 
 #Challenge and response from actual PUF data
-puf_csv = open('../data/puf_data_c16_r1.csv',newline='')
+puf_csv = open('data/puf_data_c16_r1.csv',newline='')
 challenges, responses = crp_util.get_challenge_response_from_csv(puf_csv)
 #If total examples is not a multiple of 10 and 20 then it will break... 
 #(training set is multiple of 10, batch size requires multiple of 20, can be fixed.)
@@ -83,12 +84,11 @@ with tf.Session() as sess:
 
     test_inp, test_labels = challenges[training_size:], responses[training_size:]
 
-    print('Responses: ',test_labels)
+   
     print('Cost:',cost.eval({x: test_inp, y: test_labels}))
     preds = pred.eval({x: test_inp, y: test_labels})
-    #print('Prediction Probabilities:', preds)
+    print('Actual Responses: ',np.ravel(test_labels))
     rounded_preds = [crp_util.round_predictions(word) for word in preds]
-    print('Rounded Predictions:', rounded_preds)
+    print('Predictioned Responses:', np.ravel(rounded_preds))
     accuracies = [crp_util.get_accuracy(pred,label) for pred,label in zip(rounded_preds, test_labels)]
-    print('Accuracy Per CRP:', accuracies)
     print('Average Accuracy:', sum(accuracies)/len(accuracies))
