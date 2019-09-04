@@ -21,6 +21,11 @@ response_size = len(responses[0])
 x_train, y_train = challenges[:training_size], np.ravel(responses[:training_size])
 x_test, y_test = challenges[training_size:], np.ravel(responses[training_size:])
 
+# import warnings filter
+from warnings import simplefilter
+# ignore all future warnings
+simplefilter(action='ignore', category=FutureWarning)
+
 print('Model learning of PUF data intiated.')
 print('Total Samples: {}'.format(num_examples))
 print('Training with {} samples. Accuracy tested with {} samples.'.format(training_size, test_size))
