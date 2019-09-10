@@ -13,7 +13,9 @@ def seed_and_shuffle(np_array, seed):
     np.random.shuffle(np_array)
 
 def split_data(training_size, features, labels, seed):
-    #If total examples is not a multiple of 10 it will break... 
+    if not isinstance(training_size, int):
+        print('Cannot split dataset using a non-integer value: {}.'.format(type(training_size)))
+        sys.exit(1)
     num_examples = len(features)
     test_size = num_examples - training_size
 
@@ -21,55 +23,80 @@ def split_data(training_size, features, labels, seed):
     seed_and_shuffle(features, seed)
     seed_and_shuffle(labels, seed)
 
-    x_train, y_train = features[:training_size], labels[:training_size]
-    x_test, y_test = features[training_size:], labels[training_size:]
-    return x_train, y_train, x_test, y_test
+    x_left, y_left = features[:training_size], labels[:training_size]
+    x_right, y_right = features[training_size:], labels[training_size:]
+    return (x_left, y_left), (x_right, y_right)
 
-def get_learning_rates(training_size, features, labels):
+def split_yield(total, step_size):
+    step = max(1, int(step_size * total))
+    for i in range(step, total, step):
+        yield i
+    yield total
 
-    num_examples = len(features)
-    print('Total Samples: {}'.format(num_examples))
-    print('Training with {} samples. Accuracy tested with {} samples.\n'.format(training_size, num_examples-training_size))
+def get_learning_rates(train_data, test_data):
+    
+    train_features, train_labels = train_data
+    test_features, test_labels = test_data
+    
+    print('Total Samples: {}'.format(len(train_features)+len(test_features)))
+    print('Training with {} samples. Accuracy tested with {} samples.\n'.format(len(train_features), len(test_features)))
 
-    # Split the data in different ways depending on the run and average the accuracies 
+    progressive_training_steps = split_yield(len(train_features), 0.05)
+    
     starting_seed = 123456
     num_runs = 10
+    train_split_seeds = range(starting_seed, starting_seed+num_runs)
     models = ['Logic Regression', 'Decision Tree', 
               'Random Forest', 'Support Vector Machines', 
               'K-Nearest Neighbors', 'Two-Class Bayes']
     accuracies = {name:[] for name in models} 
-    for seed in range(starting_seed, starting_seed+num_runs):
     
-        x_train, y_train, x_test, y_test = split_data(training_size, features, labels, seed)
-    
-
-        #Classifier instantiations
-        log_reg = LogisticRegression()
-        tree_model = tree.DecisionTreeClassifier(max_depth=3) 
-        rand_forest = RandomForestClassifier()  
-        svm_model = SVC(probability=True)
-        knn_model = KNeighborsClassifier(n_neighbors=3)   
-        bayes_model = GaussianNB()  
-        classifiers = [('Logic Regression', log_reg), 
-                       ('Decision Tree',tree_model), 
-                       ('Random Forest', rand_forest),
-                       ('Support Vector Machines',svm_model), 
-                       ('K-Nearest Neighbors', knn_model), 
-                       ('Two-Class Bayes', bayes_model)]
-
-        for name, model in classifiers:
-            model.fit(x_train, y_train)
-            test_predictions = model.predict(x_test)
-            score = model.score(x_test, y_test)
-            accuracies[name].append(score)
-            #print('{} Accuracy: {}'.format(name,score))
-
-    # Average accuracies of the runs and print
-    print('Data trained on {} splits of dataset'.format(num_runs))
+    print('Data trained on {} different splits of dataset'.format(num_runs))
     print('Displaying average accuracies:')
-    for name in models:
-        avg_accuracy = sum(accuracies[name])/len(accuracies[name])
-        print('{} Accuracy: {:.3f}'.format(name,avg_accuracy))
+    for training_size in progressive_training_steps:
+        print("Using {} to train models.".format(training_size))
+        # Split the data in different ways depending on the run and save accuracies per model
+        for seed in train_split_seeds:
+            train_split, train_unused = split_data(training_size, train_features, train_labels, seed)
+            seed_accuracy = train_and_predict_with_models(train_split, test_data)
+            for name in models:
+                accuracies[name].append(seed_accuracy[name])
+            
+        # Average accuracies of the runs and print
+        for name in models:
+            avg_accuracy = sum(accuracies[name])/len(accuracies[name])
+            print('{} Accuracy: {:.3f}'.format(name,avg_accuracy))
+        print('')
+        
+def train_and_predict_with_models(train_data, test_data):
+    """Given training (features, labels) and test (features, labels) data. Trains data
+       on different models and returns accuracies on the test data."""
+       
+    x_train, y_train = train_data 
+    x_test, y_test = test_data
+    accuracies = {}
+    
+    #Classifier instantiations
+    log_reg = LogisticRegression()
+    tree_model = tree.DecisionTreeClassifier(max_depth=3) 
+    rand_forest = RandomForestClassifier()  
+    svm_model = SVC(probability=True)
+    knn_model = KNeighborsClassifier(n_neighbors=3)   
+    bayes_model = GaussianNB()  
+    classifiers = [('Logic Regression', log_reg), 
+                   ('Decision Tree',tree_model), 
+                   ('Random Forest', rand_forest),
+                   ('Support Vector Machines',svm_model), 
+                   ('K-Nearest Neighbors', knn_model), 
+                   ('Two-Class Bayes', bayes_model)]
+
+    for name, model in classifiers:
+        model.fit(x_train, y_train)
+        #test_predictions = model.predict(x_test)
+        accuracies[name] = model.score(x_test, y_test)
+        #print('{} Accuracy: {}'.format(name,score))
+        
+    return accuracies   
 
 #Challenge and response from actual PUF data
 puf_csv = open('data/puf_data_c16_r1.csv',newline='')
@@ -84,16 +111,17 @@ if len(challenges) != len(responses):
     sys.exit(1)
 
 print("Total CRPs available:", len(challenges))    
-size_str = input("Enter number for CRPs for training (default 80% of total): ")
+size_str = input("Enter number for CRPs for training (default 90% of total): ")
 if not size_str :
-    training_size = int(len(challenges)*.8)
+    training_size = int(len(challenges)*0.9)
 else:
     training_size = int(size_str)
 
 # import warnings filter
 from warnings import simplefilter
 # ignore all future warnings
-simplefilter(action='ignore', category=FutureWarning)    
-get_learning_rates(training_size, challenges, responses)    
+simplefilter(action='ignore', category=FutureWarning)
+train_data, test_data = split_data(training_size, challenges, responses, 123457)    
+get_learning_rates(train_data, test_data)    
  
 
