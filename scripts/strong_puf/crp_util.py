@@ -2,6 +2,7 @@ import random
 import hashlib
 import zlib
 import csv
+import os
 
 seed = 1
 random.seed(seed)
@@ -91,3 +92,15 @@ def get_accuracy(prediction, label):
         if label_bit == pred_bit:
             correct+=1
     return correct/len(label)
+    
+def get_data_filenames(default_val):
+    inter_dir = input("Enter directory path for CRPs (Default:{}): ".format(default_val))
+    if not inter_dir:
+        inter_dir = default_val
+        print('Using default data:', inter_dir)
+    data_dir = 'data/{}'.format(inter_dir)    
+    if not os.path.isdir(inter_dir):
+        print('Directory ',inter_dir,' not found. Exiting...')
+        sys.exit(1)
+    bare_fnames = os.listdir(inter_dir)
+    return ["{}/{}".format(inter_dir, fname) for fname in bare_fnames]    
