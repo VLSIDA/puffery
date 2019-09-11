@@ -23,7 +23,7 @@ This script (hamming_distance.py) is located under scripts/weak_pufs.
 
 ## Usage
 
-<img align="center" width="50%" src="images/hamming_distance.PNG">
+<img align="middle" width="100%" src="images/hamming_distance.PNG">
 
 hamming_distance.py will compare the fingerprints (CRPs) of given PUF data. The script
 will prompt for a specified directory for intra-PUF data and inter-PUF data. 
@@ -41,7 +41,7 @@ This script (sklearn_puf_models.py) is located under scripts/strong_pufs.
 
 ## Usage
 
-<img align="center" width="50%" src="images/learning_attack.png">
+<img align="middle" width="100%" src="images/learning_attack.png">
 
 sklearn_puf_models.py takes in data from a single PUF instance. The script
 will prompt for a directory for this data and then it will prompt how much
