@@ -120,7 +120,7 @@ def get_hamming_info(data_file_names, known_fp):
     
 def plot_intra_inter_hamming(x_hdist, y_intra, y_inter):    
     
-    plt.style.use('ggplot')
+    #plt.style.use('ggplot')
 
     plt.bar(x_hdist, y_inter, color='red')
     plt.bar(x_hdist, y_intra, color='blue')

@@ -102,10 +102,10 @@ def get_accuracy(prediction, label):
             correct+=1
     return correct/len(label)
     
-def get_data_filenames(default_val):
-    inter_dir = input("Enter directory path for CRPs (Default:{}): ".format(default_val))
+def get_data_filenames(default_dir):
+    inter_dir = input("Enter directory path for CRPs (Default:{}): ".format(default_dir))
     if not inter_dir:
-        inter_dir = default_val
+        inter_dir = default_dir
         print('Using default data:', inter_dir)
     data_dir = 'data/{}'.format(inter_dir)    
     if not os.path.isdir(inter_dir):
