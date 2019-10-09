@@ -46,6 +46,15 @@ def bits_to_bytes(bit_list):
 def bytes_to_bits(bytes):
     int_val = int.from_bytes(bytes, 'big')
     return int_to_bits(int_val, len(bytes)*8)
+
+def bits_to_int(bits):
+    # Given a list of bits (0/1), convert to an int
+    # Assumes the first item in the list is the least significant bit
+    sum = 0
+    for i in range(len(bits)):
+        if bits[i]:
+            sum += 2**i
+    return sum
     
 def int_to_bits(val, bit_len=None):
     if bit_len != None:
@@ -113,3 +122,45 @@ def get_data_filenames(default_dir):
         sys.exit(1)
     bare_fnames = os.listdir(inter_dir)
     return ["{}/{}".format(inter_dir, fname) for fname in bare_fnames]    
+    
+def hash_value(bit_list):
+    """Given an input, this function will hash the value down to a specific bit length"""
+    
+    #This function only works if challenge size=16, output size=4
+    assert(len(bit_list)%2==0)
+    # Assume the 16 challenge length, generalize later
+    # Reduce the list twice
+    
+    reduced_list = []
+    for _ in range(2):
+        half_point = len(bit_list)//2
+        first_half = bit_list[:half_point]
+        second_half = bit_list[half_point:]
+        
+        reduced_list = []
+        for bit_left,bit_right in zip(first_half, second_half):
+            reduced_list.append(bit_left^bit_right)
+            
+        bit_list = reduced_list
+    
+    return bit_list    
+    
+def hash_value_to_8bit(bit_list):
+    """Given an input, this function will hash the value down to a specific bit length"""
+    
+    #This function only works if challenge size=16, output size=8
+    assert(len(bit_list)%2==0)
+    # Assume the 16 challenge length, generalize later
+    # Reduce the list twice
+    
+    half_point = len(bit_list)//2
+    first_half = bit_list[:half_point]
+    second_half = bit_list[half_point:]
+    
+    reduced_list = []
+    for bit_left,bit_right in zip(first_half, second_half):
+        reduced_list.append(bit_left^bit_right)
+        
+    bit_list = reduced_list
+    
+    return bit_list      
