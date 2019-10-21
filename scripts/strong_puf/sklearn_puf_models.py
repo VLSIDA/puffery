@@ -21,9 +21,14 @@ challenges, responses = [], []
 for fname in crp_names:
     print('Using Data from {}'.format(fname))
     data_file = open(fname,newline='')
-    cur_chal, cur_resp = crp_util.get_challenge_response_from_csv(data_file)
-    challenges+=cur_chal
-    responses+=cur_resp
+    cur_chals, cur_resps = crp_util.get_challenge_response_from_csv(data_file)
+    
+    # # Add the inverted challenge as an additional feature
+    # for i in range(len(cur_chals)):
+        # cur_chals[i] = crp_util.append_inverted_challenge(cur_chals[i])
+
+    challenges+=cur_chals
+    responses+=cur_resps
     
 # Convert to np arrays
 challenges, responses = np.asarray(challenges), np.ravel(responses)

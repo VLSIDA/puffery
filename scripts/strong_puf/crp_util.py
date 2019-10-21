@@ -17,6 +17,21 @@ seed = 1
 random.seed(seed)
 
 
+def append_inverted_challenge(challenge):
+    """Given input challenge list, adds inverted challenge as an additional feature"""
+    
+    inverted_challenge = []
+    for cbit in challenge:
+        if cbit == 0:
+            inverted_challenge.append(1)
+        elif cbit == 1:
+            inverted_challenge.append(0)
+        else:
+            print("Challenge bit is non-binary: c_bit = {}".format(cbit))
+            assert(False)
+            
+    return challenge+inverted_challenge
+    
 def gen_byte_str(byte_len, byte_range=[33,126]):
     bytes = []
     for i in range(byte_len):
