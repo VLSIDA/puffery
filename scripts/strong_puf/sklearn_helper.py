@@ -21,7 +21,7 @@ import crp_util
 
 def seed_and_shuffle(np_array, seed):
     np.random.seed(seed)
-    np.random.shuffle(np_array)
+    np.random.shuffle(np_array)    
 
 def split_data(training_size, features, labels, seed):
     if not isinstance(training_size, int):
