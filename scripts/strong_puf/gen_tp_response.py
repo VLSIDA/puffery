@@ -21,14 +21,16 @@ challenge_size = 16
 response_size = 1
 accesses = 4
 address_size = 4
-word_size = 1
-num_crps = 8000
+word_size = 2
+num_crps = 1000
 challenges = [crp_util.gen_challenge(challenge_size) for _ in range(num_crps)]
 
 # Right now, this is required. Can be changed later.
 assert(response_size == 1)
+assert(challenge_size>=word_size)
+
 num_gen_response_bits = 2**address_size
-sram_words = [round(random.random()) for _ in range(num_gen_response_bits)]
+sram_words = [crp_util.int_to_bits(random.getrandbits(word_size), word_size) for _ in range(num_gen_response_bits)]
 responses = []
 
 for C in challenges:
@@ -47,8 +49,9 @@ for C in challenges:
 
         # Combine the word with X, hardcoded to assume 1-bit word_size
         # Implemented as an XOR and shift
-        X[0] = X[0]^s_word
-        X = [0]+X[:-1]
+        X = [0]*len(s_word)+X[:-len(s_word)]
+        for i in range(len(s_word)):
+            X[i] = X[i]^s_word[i]    
       
     # Create a response from the challenge and X
     hash_value = C+X
