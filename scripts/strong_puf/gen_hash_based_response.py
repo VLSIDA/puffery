@@ -10,17 +10,22 @@
 import crp_util
 import random
 import csv
+import math
 
 random.seed(1)
 
 # Get challenges, let say they are randomly generated using the random bit values thing
 # There can be duplicated challenges with this method
 challenge_size = 16
-num_crps = 1000
+address_size = 4
+num_crps = 8000
 challenges = [crp_util.gen_challenge(challenge_size) for _ in range(num_crps)]
 
 # This challenge becomes the input to the hash function
-hash_challenges = [crp_util.hash_value_to_8bit(c)for c in challenges]
+repeat_hash_float = math.log2(challenge_size/address_size)
+assert(repeat_hash_float.is_integer())
+repeat_hash = int(repeat_hash_float)
+hash_challenges = [crp_util.hash_value(c, repeat_hash)for c in challenges]
 
 # Generates a n-bit hashed values, n-randomly generated values have been generated
 # Use the n-bit hash as a selection (1 bit response)
@@ -35,7 +40,7 @@ for hash_chal in hash_challenges:
 
 # save the challenge and response to a CSV
 # Initialize first
-file_name = 'puf_hash8_c{}_r{}.csv'.format(challenge_size,response_size)
+file_name = 'puf_hash{}_c{}_r{}.csv'.format(address_size, challenge_size,response_size)
 csv_file = open(file_name, 'w')
 fields = ('challenge','response')
 csv_writer = csv.writer(csv_file, lineterminator = '\n')
