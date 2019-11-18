@@ -48,7 +48,7 @@ def display_data(x_data, y_model_data):
     """Models share the same x axis (number of training examples) with different y values.
        Displayed together in a single graph"""
        
-    style_bank = ['ro', 'bs', 'g^', 'c*', 'kX', 'mD']
+    style_bank = ['ro', 'bs', 'g^', 'c*', 'kX', 'mD', 'yP']
     if len(style_bank) < len(y_model_data):
         print('Not enough styles for every model.')
         sys.exit(1)
@@ -62,6 +62,26 @@ def display_data(x_data, y_model_data):
     plt.ylabel("Prediction Accuracy")
     plt.gca().legend()
     plt.show()
+
+def save_data(x_data, y_model_data):
+    """Save all accuracies to a single csv"""
+        
+    import csv    
+    
+    # File setup
+    file_name = 'puf_accuracies.csv'
+    csv_file = open(file_name, 'w')
+    fields = ['training_examples'] + list(y_model_data.keys())
+    csv_writer = csv.writer(csv_file, lineterminator = '\n')
+    csv_writer.writerow(fields)    
+        
+    # write training examples and accuracies
+    for example_ind in range(len(x_data)):
+        row = [x_data[example_ind]]
+        for model_name in y_model_data.keys():
+            row.append("%.3g" % y_model_data[model_name][example_ind])
+        csv_writer.writerow(row) 
+    csv_file.close()     
 
 def model_accuracy_with_varied_training(train_data, test_data):
     
@@ -101,6 +121,7 @@ def model_accuracy_with_varied_training(train_data, test_data):
         print('')
         
     display_data(progressive_training_steps, avg_accuracies)
+    save_data(progressive_training_steps, avg_accuracies)
     
 def train_and_predict_with_models(train_data, test_data):
     """Given training (features, labels) and test (features, labels) data. Trains data

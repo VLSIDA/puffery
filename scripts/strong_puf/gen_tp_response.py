@@ -19,9 +19,9 @@ random.seed(1)
 # There can be duplicated challenges with this method
 challenge_size = 16
 response_size = 1
-accesses = 4
+accesses = 2
 address_size = 4
-word_size = 2
+word_size = 8
 num_crps = 1000
 challenges = [crp_util.gen_challenge(challenge_size) for _ in range(num_crps)]
 
