@@ -15,7 +15,10 @@ import crp_util
 import sklearn_helper
 
 #Challenge and response from actual PUF data
-DEFAULT_DATA_DIR = "data/crp_c16_r1"
+if len(sys.argv) > 1:
+    DEFAULT_DATA_DIR = sys.argv[1]
+else:
+    DEFAULT_DATA_DIR = "data/crp_c16_r1"
 crp_names = crp_util.get_data_filenames(DEFAULT_DATA_DIR)
 challenges, responses = [], []
 for fname in crp_names:

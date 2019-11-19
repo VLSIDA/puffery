@@ -1,0 +1,9 @@
+All datasets were created using the gen_tp script.
+These values were constant across generations except for
+the number of accesses parameter.
+
+challenge_size = 16
+response_size = 1
+address_size = 4
+word_size = 8
+num_crps = 8000

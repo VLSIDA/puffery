@@ -39,8 +39,13 @@ for row in csv_reader:
         
     line_count+=1        
 
-y_avg_dict = {'Average Accuracy':y_average}
-#y_accuracies['Average Accuracy'] = y_average
-sklearn_helper.display_data(x_examples, y_avg_dict)
+# y_avg_dict = {'Average Accuracy':y_average}
+# #y_accuracies['Average Accuracy'] = y_average
+# sklearn_helper.display_data(x_examples, y_avg_dict)
 
-#sklearn_helper.display_data(x_examples, y_accuracies)
+print("Average Stats:")
+print('training_examples,average_data')
+for t_examples, acc in zip(x_examples, y_average):
+    print(str(t_examples)+','+str("%.3g" % acc))
+
+sklearn_helper.display_data(x_examples, y_accuracies)
