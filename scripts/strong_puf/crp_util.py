@@ -13,6 +13,8 @@ import zlib
 import csv
 import os
 import sys 
+import math
+import numpy as np
 
 seed = 1
 random.seed(seed)
@@ -51,6 +53,12 @@ def gen_bytes(num_bytes):
 def gen_challenge(num_bits):
     rand_bits = random.getrandbits(num_bits)
     return int_to_bits(rand_bits, num_bits)  
+    
+def gen_challenges(num_challenges, challenge_size):
+    """Generates challenges without replacement."""
+    int_max = 1<<challenge_size
+    rand_ints = np.random.choice(int_max,num_challenges,replace=False)
+    return [int_to_bits(num, challenge_size) for num in rand_ints]  
     
 def bits_to_bytes(bit_list):
     if len(bit_list)%8 != 0:
@@ -139,16 +147,51 @@ def get_data_filenames(default_dir):
     bare_fnames = os.listdir(inter_dir)
     return ["{}/{}".format(inter_dir, fname) for fname in bare_fnames]    
     
-def hash_value(bit_list, repetitions):
-    """Hash the value by half its input size.
-       Repeats as many times as desired.
+def hash_value(bit_list, target_hash_size):
+    """Hash the value to target size.
+       This only works if both input and target size are power of 2
     """
+    
+    repeat_hash_float = math.log2(len(bit_list)/target_hash_size)
+    assert(repeat_hash_float.is_integer())
+    repeat_hash = int(repeat_hash_float)
+    
     reduced_list = bit_list
-    for _ in range(repetitions):
+    for _ in range(repeat_hash):
         reduced_list = hash_value_in_half(reduced_list)
     
     return reduced_list    
+ 
+def hash_value_with_modulo(bit_list, target_hash_size):
+    """Hash the value to target size.
+    """
     
+    prehash_int = bits_to_int(bit_list)
+    mod_int = 2**target_hash_size
+    hash_int = prehash_int % mod_int
+    return int_to_bits(hash_int)
+    
+def hash_value_mult_mod(bit_list, target_hash_size):
+    """Hash the value to target size.
+    """
+    half_point = len(bit_list)//2
+    left_int = bits_to_int(bit_list[:half_point])
+    right_int = bits_to_int(bit_list[half_point:])
+    mod_int = 2**target_hash_size
+    hash_int = left_int*right_int % mod_int
+    return int_to_bits(hash_int)    
+    
+def hash_value_mult_xor(bit_list, target_hash_size):
+    """Hash the value to target size.
+       This only works if both input and target size are power of 2
+    """
+    half_point = len(bit_list)//2
+    left_int = bits_to_int(bit_list[:half_point])
+    right_int = bits_to_int(bit_list[half_point:])
+    hash_int = left_int*right_int
+    hash_bits = int_to_bits(hash_int, len(bit_list))
+    return hash_value(hash_bits, target_hash_size)      
+ 
 def hash_value_in_half(bit_list):
     """Given an input, this function will hash the value down to a specific bit length"""
     

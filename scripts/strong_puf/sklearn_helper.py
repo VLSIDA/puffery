@@ -63,6 +63,37 @@ def display_data(x_data, y_model_data):
     plt.gca().legend()
     plt.show()
 
+def display_accuracy_by_access(x_data, y_model_data, name_order=None):
+    """Models share the same x axis (number of training examples) with different y values.
+       Displayed together in a single graph"""
+       
+    style_bank = ['ro', 'bs', 'g^', 'c*', 'kX', 'mD', 'yP']
+    if len(style_bank) < len(y_model_data):
+        print('Not enough styles for every model.')
+        sys.exit(1)
+        
+    style_pos = 0    
+    names = list(y_model_data.keys())
+    names_with_10bits = [name for name in names]
+    
+    names.sort()
+    
+    if name_order:
+        for name in name_order:
+            plt.plot(x_data, y_model_data[name], style_bank[style_pos], linestyle='solid', label=name)
+            #plt.plot(x_data, y_model_data[name], style_bank[style_pos], linestyle='', label=name)
+            style_pos+=1
+    else:
+        for name, accuracy in y_model_data.items():
+            plt.plot(x_data, accuracy, style_bank[style_pos], linestyle='solid', label=name)
+            #plt.plot(x_data, accuracy, style_bank[style_pos], linestyle='', label=name)
+            style_pos+=1
+    
+    plt.xlabel("MAP Accesses")
+    plt.ylabel("Prediction Accuracy")
+    plt.gca().legend()
+    plt.show()
+
 def save_data(x_data, y_model_data):
     """Save all accuracies to a single csv"""
         
@@ -83,7 +114,7 @@ def save_data(x_data, y_model_data):
         csv_writer.writerow(row) 
     csv_file.close()     
 
-def model_accuracy_with_varied_training(train_data, test_data):
+def model_accuracy_with_varied_training(train_data, test_data, train_point=None, display_and_save=True):
     
     train_features, train_labels = train_data
     test_features, test_labels = test_data
@@ -91,10 +122,15 @@ def model_accuracy_with_varied_training(train_data, test_data):
     print('Total Samples: {}'.format(len(train_features)+len(test_features)))
     print('Training with {} samples. Accuracy tested with {} samples.\n'.format(len(train_features), len(test_features)))
 
-    progressive_training_steps = get_train_steps(len(train_features), 0.05)
+    # Can define a single point of training as an option rather than dividing the range
+    if train_point:
+        assert(type(train_point)==float)
+        progressive_training_steps = [int(len(train_features)*train_point)]
+    else:
+        progressive_training_steps = get_train_steps(len(train_features), 0.05)
     
     starting_seed = 123456
-    num_runs = 10
+    num_runs = 2
     train_split_seeds = range(starting_seed, starting_seed+num_runs)
     models = ['Logistic Regression', 'Decision Tree', 
               'Random Forest', 'Support Vector Machines', 
@@ -120,8 +156,11 @@ def model_accuracy_with_varied_training(train_data, test_data):
             print('{} Accuracy: {:.3f}'.format(name,avg_accuracy))
         print('')
         
-    display_data(progressive_training_steps, avg_accuracies)
-    save_data(progressive_training_steps, avg_accuracies)
+    if display_and_save:    
+        display_data(progressive_training_steps, avg_accuracies)
+        save_data(progressive_training_steps, avg_accuracies)
+    
+    return avg_accuracies
     
 def train_and_predict_with_models(train_data, test_data):
     """Given training (features, labels) and test (features, labels) data. Trains data
