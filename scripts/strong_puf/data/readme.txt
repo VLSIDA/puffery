@@ -14,6 +14,9 @@ Description of available datasets:
    dataset represents an upperbound for any PUF as there is no correlation
    between challenge and response.
    
+4) crp_arb: 16-bit challenge, 1-bit response from an Arbiter PUF from HSPICE 
+simulated data in FreePDK45 technology.   
+   
 Notes:
 All datasets are have a 16-bit challenge and 1-bit response. The challenge size
 was made small to allow SPICE simulations to be faster. This is considered small
